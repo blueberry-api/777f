@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>空勤登记证背景申报表</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        .container { max-width: 800px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f2328;
+            margin-bottom: 6px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+        .form-row { display: flex; gap: 16px; }
+        .form-row .form-group { flex: 1; }
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2328;
+            margin: 24px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #d0d7de;
+        }
+        .loop-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .loop-table th, .loop-table td {
+            border: 1px solid #d0d7de;
+            padding: 8px;
+            text-align: left;
+        }
+        .loop-table th { background: #f6f8fa; font-weight: 500; }
+        .loop-table input, .loop-table textarea {
+            width: 100%;
+            border: none;
+            padding: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            background: transparent;
+        }
+        .loop-table input:focus, .loop-table textarea:focus {
+            outline: none;
+            background: #f0f6ff;
+        }
+        .btn-sm { padding: 4px 10px; font-size: 13px; }
+        .btn-danger { background: #cf222e; color: #fff; border: none; }
+        .btn-danger:hover { background: #a40e26; }
+        @media (max-width: 768px) {
+            .form-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../index.html" class="back-link">返回首页</a>
+            <h1>空勤登记证背景申报表</h1>
+            <p>填写完成后可导出为Word文档</p>
+            <label id="manualUpload" style="display:none; position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#2563eb; cursor:pointer; font-size:14px;">
+                手动导入模板 <input type="file" id="templateFile" accept=".docx" style="display:none;">
+            </label>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h3 class="section-title">表头信息</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>表头姓名</label>
+                        <input type="text" id="docName" placeholder="请输入您的姓名（这是首页的）">
+                    </div>
+                    <div class="form-group">
+                        <label>表头公司</label>
+                        <input type="text" id="docCompany">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>填表日期</label>
+                    <input type="date" id="dayTime">
+                </div>
+
+                <h3 class="section-title">基本信息</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="name" placeholder="请输入您的姓名（这是简历页的）">
+                    </div>
+                    <div class="form-group">
+                        <label>性别</label>
+                        <input type="text" id="gender">
+                    </div>
+                    <div class="form-group">
+                        <label>民族</label>
+                        <input type="text" id="nation">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>曾用名</label>
+                        <input type="text" id="formerName">
+                    </div>
+                    <div class="form-group">
+                        <label>出生年月</label>
+                        <input type="text" id="birthYearMonth">
+                    </div>
+                    <div class="form-group">
+                        <label>籍贯</label>
+                        <input type="text" id="nativePlace">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>身份证号</label>
+                        <input type="text" id="idCardNumber">
+                    </div>
+                    <div class="form-group">
+                        <label>文化程度</label>
+                        <input type="text" id="educationLevel" value="大学本科">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>婚姻状况</label>
+                        <input type="text" id="maritalStatus">
+                    </div>
+                    <div class="form-group">
+                        <label>政治面貌</label>
+                        <input type="text" id="politicalStatus">
+                    </div>
+                    <div class="form-group">
+                        <label>加入时间</label>
+                        <input type="text" id="politicalStatusJoinTime" placeholder="仅党员/团员填写">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>宗教信仰情况</label>
+                    <textarea id="religiousBelief" placeholder="无宗教信仰填"无""></textarea>
+                </div>
+                <div class="form-group">
+                    <label>户籍地址</label>
+                    <input type="text" id="householdRegisterAddress">
+                </div>
+                <div class="form-group">
+                    <label>现居住地</label>
+                    <textarea id="currentResidence" placeholder="须精确至门牌号"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>违法犯罪情况</label>
+                    <textarea id="illegalCrimeRecord" placeholder="无违法犯罪情况填"无""></textarea>
+                </div>
+                <div class="form-group">
+                    <label>参加何种组织情况</label>
+                    <textarea id="joinOrganizationSituation" placeholder="未参加任何组织填"无""></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>入职岗位</label>
+                        <input type="text" id="entryPosition">
+                    </div>
+                    <div class="form-group">
+                        <label>本人电话</label>
+                        <input type="text" id="personalPhone">
+                    </div>
+                </div>
+
+                <h3 class="section-title">个人简历</h3>
+                <div class="form-group">
+                    <label>简历-初中</label>
+                    <input type="text" id="personalResumemiddle" placeholder="19XX年X月至20XX年X月,在XX省XX市XX学校就学">
+                </div>
+                <div class="form-group">
+                    <label>简历-高中</label>
+                    <input type="text" id="personalResumehigh" placeholder="19XX年X月至20XX年X月,在XX省XX市XX学校就学">
+                </div>
+                <div class="form-group">
+                    <label>简历-大学</label>
+                    <input type="text" id="personalResumecollege" placeholder="19XX年X月至20XX年X月,在XX省XX市XX学校就学">
+                </div>
+                <div class="form-group">
+                    <label>简历-现在</label>
+                    <input type="text" id="personalResumenow" placeholder="20XX年X月至今,在XX省XX市XX公司从事XX">
+                </div>
+
+                <h3 class="section-title">配偶信息</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>配偶姓名</label>
+                        <input type="text" id="spouseName">
+                    </div>
+                    <div class="form-group">
+                        <label>配偶民族</label>
+                        <input type="text" id="spouseNation">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>配偶身份证号</label>
+                        <input type="text" id="spouseIdCardNumber">
+                    </div>
+                    <div class="form-group">
+                        <label>配偶政治面貌</label>
+                        <input type="text" id="spousePoliticalStatus">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>配偶联系电话</label>
+                        <input type="text" id="spousePhone">
+                    </div>
+                    <div class="form-group">
+                        <label>配偶单位及岗位</label>
+                        <input type="text" id="spouseCompanyAndPosition">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>配偶现居住地</label>
+                    <textarea id="spouseCurrentResidence"></textarea>
+                </div>
+
+                <h3 class="section-title">父亲信息</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>父亲姓名</label>
+                        <input type="text" id="fatherName">
+                    </div>
+                    <div class="form-group">
+                        <label>父亲民族</label>
+                        <input type="text" id="fatherNation">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>父亲身份证号</label>
+                        <input type="text" id="fatherIdCardNumber">
+                    </div>
+                    <div class="form-group">
+                        <label>父亲政治面貌</label>
+                        <input type="text" id="fatherPoliticalStatus">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>父亲联系电话</label>
+                        <input type="text" id="fatherPhone">
+                    </div>
+                    <div class="form-group">
+                        <label>父亲单位及岗位</label>
+                        <input type="text" id="fatherCompanyAndPosition">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>父亲现居住地</label>
+                    <textarea id="fatherCurrentResidence"></textarea>
+                </div>
+
+                <h3 class="section-title">母亲信息</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>母亲姓名</label>
+                        <input type="text" id="motherName">
+                    </div>
+                    <div class="form-group">
+                        <label>母亲民族</label>
+                        <input type="text" id="motherNation">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>母亲身份证号</label>
+                        <input type="text" id="motherIdCardNumber">
+                    </div>
+                    <div class="form-group">
+                        <label>母亲政治面貌</label>
+                        <input type="text" id="motherPoliticalStatus">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>母亲联系电话</label>
+                        <input type="text" id="motherPhone">
+                    </div>
+                    <div class="form-group">
+                        <label>母亲单位及岗位</label>
+                        <input type="text" id="motherCompanyAndPosition">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>母亲现居住地</label>
+                    <textarea id="motherCurrentResidence"></textarea>
+                </div>
+
+                <h3 class="section-title">直接抚养人信息（如适用）</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>直接抚养人姓名</label>
+                        <input type="text" id="fostererName">
+                    </div>
+                    <div class="form-group">
+                        <label>直接抚养人民族</label>
+                        <input type="text" id="fostererNation">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>直接抚养人身份证号</label>
+                        <input type="text" id="fostererIdCardNumber">
+                    </div>
+                    <div class="form-group">
+                        <label>直接抚养人政治面貌</label>
+                        <input type="text" id="fostererPoliticalStatus">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>直接抚养人联系电话</label>
+                        <input type="text" id="fostererPhone">
+                    </div>
+                    <div class="form-group">
+                        <label>直接抚养人单位及岗位</label>
+                        <input type="text" id="fostererCompanyAndPosition">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>直接抚养人现居住地</label>
+                    <textarea id="fostererCurrentResidence"></textarea>
+                </div>
+
+                <h3 class="section-title">其他主要关系人员信息</h3>
+                <div class="form-group">
+                    <table class="loop-table" id="table_otherMainRelations">
+                        <thead><tr><th>姓名</th><th>关系</th><th>年龄</th><th>政治面貌</th><th>职业</th><th>工作单位</th><th style="width:60px">操作</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                    <button type="button" class="btn btn-sm" onclick="addLoopRow()">+ 添加行</button>
+                </div>
+
+                <div class="button-group" style="margin-top: 24px;">
+                    <button class="btn btn-primary" id="exportBtn">导出Word文档</button>
+                    <button class="btn" id="clearBtn">清空表单</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="../../libs/pizzip.min.js"></script>
+<script src="../../libs/docxtemplater.min.js"></script>
+<script src="aircrew-cert-form.js"></script>
+</body>
+</html>

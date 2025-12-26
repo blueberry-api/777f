@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账单甘特图生成</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        html, body { overflow-x: hidden; }
+        .container { max-width: 1400px; overflow: hidden; }
+        
+        .panel { overflow: hidden; margin-bottom: 20px; }
+        
+        .config-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .config-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .config-item label { font-size: 13px; white-space: nowrap; }
+        .config-item select {
+            padding: 6px 10px;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+            font-size: 13px;
+            min-width: 120px;
+        }
+        
+        .table-scroll {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 200px;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+        .preview-table {
+            border-collapse: collapse;
+            font-size: 11px;
+            min-width: max-content;
+        }
+        .preview-table th, .preview-table td {
+            border: 1px solid #d0d7de;
+            padding: 4px 6px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .preview-table th { background: #f6f8fa; position: sticky; top: 0; }
+        
+        .action-section {
+            text-align: center;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .result-stats {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        .stat-item { text-align: center; }
+        .stat-item .num { font-size: 24px; font-weight: bold; color: #e85a3c; }
+        .stat-item .label { font-size: 12px; color: #656d76; }
+        
+        .result-preview {
+            max-height: 600px;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+        }
+        .result-table {
+            border-collapse: collapse;
+            font-size: 11px;
+            min-width: max-content;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #d0d7de;
+            padding: 4px 6px;
+            text-align: center;
+            min-width: 40px;
+            white-space: nowrap;
+        }
+        .result-table th {
+            background: #f6f8fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .result-table .name-col {
+            text-align: left;
+            min-width: 70px;
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 5;
+        }
+        .result-table th.name-col { z-index: 15; background: #f6f8fa; }
+        .result-table .task-row { background: #fff; }
+        .result-table .hotel-row { background: #fff3cd; }
+        .result-table .hotel-row .name-col { background: #fff3cd; color: #856404; }
+        .result-table .hotel-cell { background: #ffc107; color: #000; font-weight: bold; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../index.html" class="back-link">返回首页</a>
+            <h1>账单甘特图生成</h1>
+            <p>将酒店账单转换为甘特图格式，与飞行任务日程对比审核</p>
+        </div>
+        
+        <!-- 任务日程表 -->
+        <div class="panel">
+            <h3 class="panel-title">1. 飞行员任务日程表</h3>
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                <input type="file" id="scheduleFile" accept=".xlsx,.xls">
+                <label>表头行: <input type="number" id="scheduleHeaderRow" value="0" min="0" style="width:50px"></label>
+            </div>
+            <div id="scheduleStatus" class="status"></div>
+            <div id="scheduleConfigSection" class="hidden">
+                <div class="config-row">
+                    <div class="config-item">
+                        <label>姓名列:</label>
+                        <select id="scheduleNameCol"></select>
+                    </div>
+                    <div class="config-item">
+                        <label>日期起始列:</label>
+                        <select id="scheduleDateStartCol"></select>
+                    </div>
+                </div>
+                <div class="table-scroll">
+                    <table id="schedulePreview" class="preview-table"></table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 账单表 -->
+        <div class="panel">
+            <h3 class="panel-title">2. 飞行员账单表</h3>
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                <input type="file" id="billFile" accept=".xlsx,.xls">
+                <label>表头行: <input type="number" id="billHeaderRow" value="0" min="0" style="width:50px"></label>
+            </div>
+            <div id="billStatus" class="status"></div>
+            <div id="billConfigSection" class="hidden">
+                <div class="config-row">
+                    <div class="config-item">
+                        <label>入住人员列:</label>
+                        <select id="billNameCol"></select>
+                    </div>
+                    <div class="config-item">
+                        <label>入住时间列:</label>
+                        <select id="billCheckinCol"></select>
+                    </div>
+                    <div class="config-item">
+                        <label>退房时间列:</label>
+                        <select id="billCheckoutCol"></select>
+                    </div>
+                    <div class="config-item">
+                        <label>入住事由列:</label>
+                        <select id="billReasonCol"></select>
+                    </div>
+                </div>
+                <div class="table-scroll">
+                    <table id="billPreview" class="preview-table"></table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div id="actionSection" class="action-section hidden">
+            <button id="generateBtn" class="btn btn-primary">生成甘特图</button>
+            <button id="exportBtn" class="btn" disabled>导出Excel</button>
+        </div>
+        
+        <!-- 结果展示 -->
+        <div id="resultSection" class="panel hidden">
+            <h3 class="panel-title">生成结果</h3>
+            <div class="result-stats">
+                <div class="stat-item">
+                    <div class="num" id="totalPersons">0</div>
+                    <div class="label">涉及人员</div>
+                </div>
+                <div class="stat-item">
+                    <div class="num" id="totalRecords">0</div>
+                    <div class="label">住宿记录</div>
+                </div>
+                <div class="stat-item">
+                    <div class="num" id="totalDays">0</div>
+                    <div class="label">住宿天数</div>
+                </div>
+            </div>
+            <div class="result-preview">
+                <table id="resultTable" class="result-table"></table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../../libs/xlsx-js-style.min.js"></script>
+    <script src="bill-gantt.js"></script>
+</body>
+</html>

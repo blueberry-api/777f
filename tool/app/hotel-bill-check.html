@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒店账单核对</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        /* 页面特有样式 */
+        .container { max-width: 1400px; }
+        
+        .file-inputs { display: flex; gap: 20px; flex-wrap: wrap; }
+        .file-input-group { flex: 1; min-width: 280px; }
+        .file-input-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #1f2328; font-weight: 500; }
+        .file-input-group input[type="file"], .file-input-group select { width: 100%; padding: 8px; border: 1px solid #d0d7de; border-radius: 6px; font-size: 14px; }
+        .file-input-group select { margin-top: 8px; }
+        
+        .preview-wrapper { margin-top: 12px; overflow-x: auto; border: 1px solid #d0d7de; border-radius: 6px; max-height: 180px; }
+        .preview-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .preview-table th { background: #f6f8fa; padding: 8px; text-align: left; border-bottom: 1px solid #d0d7de; white-space: nowrap; position: sticky; top: 0; }
+        .preview-table td { padding: 6px 8px; border-bottom: 1px solid #d0d7de; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .config-row { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 12px; }
+        .config-item { display: flex; align-items: center; gap: 8px; }
+        .config-item label { font-size: 13px; color: #1f2328; white-space: nowrap; }
+        .config-item select { padding: 6px 10px; border: 1px solid #d0d7de; border-radius: 4px; font-size: 13px; }
+        
+        .display-cols { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; padding: 10px; background: #f6f8fa; border-radius: 4px; }
+        .display-cols label { display: flex; align-items: center; gap: 4px; font-size: 12px; padding: 4px 8px; background: #fff; border: 1px solid #d0d7de; border-radius: 4px; cursor: pointer; }
+        .display-cols label:hover { border-color: #e85a3c; }
+        
+        .summary { display: flex; gap: 15px; margin-bottom: 12px; font-size: 14px; color: #656d76; }
+        
+        .result-wrapper { overflow-x: auto; border: 1px solid #d0d7de; border-radius: 6px; max-height: 500px; }
+        .result-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .result-table th { background: #f6f8fa; padding: 8px; text-align: left; border-bottom: 1px solid #d0d7de; white-space: nowrap; position: sticky; top: 0; font-weight: 600; }
+        .result-table td { padding: 8px; border-bottom: 1px solid #d0d7de; }
+        .result-table tr.matched { background: #ffe4de; }
+        .result-table tr.unmatched { background: #ffebe9; }
+        
+        .status-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+        .status-badge.matched { background: #ffe4de; color: #e85a3c; }
+        .status-badge.unmatched { background: #ffebe9; color: #cf222e; }
+        
+        .proof-link { color: #e85a3c; text-decoration: none; font-size: 12px; }
+        .proof-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header"><a href="../../index.html" class="back-link">返回首页</a><h1>酒店账单核对</h1></div>
+    <div class="main-content">
+        <div class="panel">
+            <h2 class="section-title">第一步：上传文件</h2>
+            <div class="file-inputs">
+                <div class="file-input-group">
+                    <label>账单表 (.xlsx)</label>
+                    <input type="file" id="billFile" accept=".xlsx,.xls">
+                    <select id="billHeaderRow">
+                        <option value="0">表头在第1行</option>
+                        <option value="1" selected>表头在第2行</option>
+                        <option value="2">表头在第3行</option>
+                    </select>
+                    <div id="billStatus" class="status"></div>
+                </div>
+                <div class="file-input-group">
+                    <label>登记表 (.xlsx)</label>
+                    <input type="file" id="checkinFile" accept=".xlsx,.xls">
+                    <select id="checkinHeaderRow">
+                        <option value="0" selected>表头在第1行</option>
+                        <option value="1">表头在第2行</option>
+                        <option value="2">表头在第3行</option>
+                    </select>
+                    <div id="checkinStatus" class="status"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" id="billConfigSection" style="display:none;">
+            <h2 class="section-title">第二步：账单表列配置</h2>
+            <div class="preview-wrapper"><table class="preview-table" id="billPreview"></table></div>
+            <div class="config-row">
+                <div class="config-item"><label>姓名列：</label><select id="billNameCol"></select></div>
+                <div class="config-item"><label>日期列：</label><select id="billDateCol"></select></div>
+            </div>
+            <p class="hint">选择要显示的列：</p>
+            <div class="display-cols" id="billDisplayCols"></div>
+        </div>
+
+        <div class="panel" id="checkinConfigSection" style="display:none;">
+            <h2 class="section-title">第三步：登记表列配置</h2>
+            <div class="preview-wrapper"><table class="preview-table" id="checkinPreview"></table></div>
+            <div class="config-row">
+                <div class="config-item"><label>姓名列：</label><select id="checkinNameCol"></select></div>
+                <div class="config-item"><label>日期列：</label><select id="checkinDateCol"></select></div>
+            </div>
+            <p class="hint">选择要显示的列：</p>
+            <div class="display-cols" id="checkinDisplayCols"></div>
+        </div>
+
+        <div class="panel" id="matchSection" style="display:none;">
+            <h2 class="section-title">第四步：开始匹配</h2>
+            <div class="button-group">
+                <div class="config-item">
+                    <label>日期容差：</label>
+                    <select id="dateTolerance">
+                        <option value="1">±1天</option>
+                        <option value="2" selected>±2天</option>
+                        <option value="3">±3天</option>
+                    </select>
+                </div>
+                <button id="matchBtn" class="btn btn-primary">开始匹配</button>
+                <button id="exportBtn" class="btn btn-primary" disabled>导出Excel</button>
+            </div>
+        </div>
+
+        <div class="panel" id="resultSection" style="display:none;">
+            <h2 class="section-title">匹配结果</h2>
+            <div class="summary">
+                <span>总账单：<strong id="totalCount">0</strong></span>
+                <span>已匹配：<strong id="matchedCount">0</strong></span>
+                <span>未匹配：<strong id="unmatchedCount">0</strong></span>
+            </div>
+            <div class="result-wrapper">
+                <table class="result-table" id="resultTable">
+                    <thead id="resultHead"></thead>
+                    <tbody id="resultBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="section-title">使用说明</h2>
+            <ol style="margin-left: 20px; line-height: 1.8; color: #656d76; font-size: 14px;">
+                <li>上传账单表和登记表，选择正确的表头行</li>
+                <li>配置账单表的姓名列和日期列，勾选要显示的列</li>
+                <li>配置登记表的姓名列和日期列，勾选要显示的列</li>
+                <li>设置日期容差，点击"开始匹配"</li>
+                <li>查看结果，点击"导出Excel"下载</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script src="../../libs/xlsx.bundle.js"></script>
+<script src="hotel-bill-check.js"></script>
+</body>
+</html>

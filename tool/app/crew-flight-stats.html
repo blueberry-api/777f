@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航线班次统计</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        /* 页面特有样式 */
+        .container { max-width: 1200px; }
+        
+        .file-inputs {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .file-input-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .file-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #1f2328;
+            font-weight: 500;
+        }
+        
+        .file-input-group input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .sheet-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .sheet-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .sheet-checkbox:hover { background: #eaeef2; }
+        .sheet-checkbox input { cursor: pointer; }
+        .sheet-checkbox.checked { background: #ffe4de; border-color: #e85a3c; }
+        
+        .sheet-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .warning-list {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #fff8c5;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .result-info {
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #656d76;
+        }
+        
+        #resultTable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        #resultTable th, #resultTable td {
+            padding: 8px 12px;
+            border: 1px solid #d0d7de;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        #resultTable th {
+            background: #f6f8fa;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        #resultTable th:first-child,
+        #resultTable td:first-child {
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 1;
+        }
+        
+        #resultTable th:first-child {
+            background: #f6f8fa;
+            z-index: 2;
+        }
+        
+        #resultTable tbody tr:hover { background: #f6f8fa; }
+        #resultTable tbody tr:hover td:first-child { background: #f6f8fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../index.html" class="back-link">返回首页</a>
+            <h1>航线班次统计</h1>
+        </div>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2 class="section-title">第一步：上传文件</h2>
+                <div class="file-inputs">
+                    <div class="file-input-group">
+                        <label>排班表 (.xlsx)</label>
+                        <input type="file" id="scheduleFile" accept=".xlsx,.xls">
+                        <div id="scheduleStatus" class="status"></div>
+                    </div>
+                    <div class="file-input-group">
+                        <label>机组花名册 (.xlsx)</label>
+                        <input type="file" id="rosterFile" accept=".xlsx,.xls">
+                        <div id="rosterStatus" class="status"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel" id="sheetSection" style="display:none;">
+                <h2 class="section-title">第二步：选择要统计的工作表（月份）</h2>
+                <div class="sheet-actions">
+                    <button id="selectAllBtn" class="btn btn-small">全选</button>
+                    <button id="selectNoneBtn" class="btn btn-small">全不选</button>
+                </div>
+                <div id="sheetSelector" class="sheet-selector"></div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="section-title">第三步：统计与导出</h2>
+                <div class="button-group">
+                    <button id="analyzeBtn" class="btn btn-primary" disabled>开始统计</button>
+                    <button id="exportBtn" class="btn btn-primary" disabled>导出Excel</button>
+                </div>
+            </div>
+            
+            <div class="panel" id="warningSection" style="display:none;">
+                <h2 class="section-title">⚠️ 未匹配的内容</h2>
+                <div id="warningList" class="warning-list"></div>
+            </div>
+            
+            <div class="panel" id="resultSection" style="display:none;">
+                <h2 class="section-title">统计结果</h2>
+                <div class="result-info" id="resultInfo"></div>
+                <div class="table-wrapper" style="max-height: 500px;">
+                    <table id="resultTable">
+                        <thead id="resultHead"></thead>
+                        <tbody id="resultBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="section-title">使用说明</h2>
+                <ol style="margin-left: 20px; line-height: 1.8; color: #656d76;">
+                    <li>上传排班表（A列为航线名称，其他列为日期对应的机组人员）</li>
+                    <li>上传机组花名册（第一列员工号，第二列姓名）</li>
+                    <li>选择要统计的工作表（可多选）</li>
+                    <li>点击"开始统计"进行分析</li>
+                    <li>查看结果，点击"导出Excel"下载统计表</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+<script src="../../libs/xlsx.full.min.js"></script>
+<script src="crew-flight-stats.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提取员工号</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        /* 页面特有样式 */
+        .input-output-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .input-section, .output-section {
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            flex: 1;
+        }
+        
+        .input-area {
+            min-height: 200px;
+        }
+        
+        .output-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            color: #656d76;
+            font-size: 12px;
+        }
+        
+        .input-header, .output-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+        }
+        
+        .input-header .button-group, .output-header .button-group {
+            margin-top: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .input-output-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../index.html" class="back-link">返回首页</a>
+            <h1>提取员工号</h1>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-output-container">
+                <div class="input-section">
+                    <h2 class="section-title">输入文本</h2>
+                    <div class="input-header">
+                        <div class="button-group">
+                            <button id="extractBtn" class="btn btn-primary">提取六位数字</button>
+                            <button id="clearBtn" class="btn">清空输入</button>
+                        </div>
+                    </div>
+                    <textarea id="inputText" class="input-area" placeholder="请在此处粘贴或输入您的文本内容..."></textarea>
+                </div>
+                
+                <div class="output-section">
+                    <h2 class="section-title">提取结果</h2>
+                    <div class="output-header">
+                        <div class="button-group">
+                            <button id="copyBtn" class="btn btn-primary">一键复制</button>
+                        </div>
+                    </div>
+                    <div id="outputArea" class="output-area">提取结果将显示在这里...</div>
+                    <div class="output-info">
+                        <span id="countInfo">提取到 0 个六位数字</span>
+                        <span id="uniqueInfo">去重后 0 个唯一数字</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="section-title">使用说明</h2>
+                <p>从混杂着员工号的文本中提取6位数字员工号，自动去重并排序。</p>
+                <ol style="margin-left: 20px; margin-top: 8px; line-height: 1.8; color: #656d76;">
+                    <li>将文本粘贴到输入框</li>
+                    <li>点击"提取六位数字"</li>
+                    <li>点击"一键复制"复制结果</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+<script src="crew-extract-id.js"></script>
+</body>
+</html>

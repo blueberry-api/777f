@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF解锁</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        /* 页面特有样式 */
+        .container { max-width: 800px; }
+        
+        .file-name { font-size: 14px; font-weight: 500; color: #1f2328; margin-bottom: 8px; }
+        .file-meta { font-size: 13px; color: #656d76; }
+        
+        .status-list { margin-top: 12px; }
+        .status-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 13px; }
+        .status-icon { width: 20px; text-align: center; }
+        .status-icon.locked { color: #cf222e; }
+        .status-icon.unlocked { color: #e85a3c; }
+        
+        .result { margin-top: 16px; padding: 16px; border-radius: 6px; }
+        .result.success { background: #ffe4de; color: #e85a3c; }
+        .result.error { background: #ffebe9; color: #cf222e; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a href="../../index.html" class="back-link">返回首页</a>
+        <h1>PDF解锁</h1>
+        <p>移除PDF的权限限制，解除打印、复制、编辑等限制</p>
+    </div>
+    <div class="main-content">
+        <div class="panel">
+            <h2 class="section-title">选择PDF文件</h2>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept=".pdf">
+                <div class="upload-icon"></div>
+                <div class="upload-text">拖拽PDF文件到此处，或 <strong>点击选择文件</strong></div>
+            </div>
+            
+            <div class="file-info" id="fileInfo" style="display:none; background: #f6f8fa;">
+                <div class="file-name" id="fileName"></div>
+                <div class="file-meta" id="fileMeta"></div>
+                <div class="status-list" id="statusList"></div>
+                <div class="button-group" style="margin-top: 16px;">
+                    <button id="unlockBtn" class="btn btn-primary" disabled>解锁PDF</button>
+                </div>
+                <div class="result" id="result" style="display:none;"></div>
+            </div>
+            
+            <div class="warning">
+                注意：此工具只能移除权限限制（如禁止打印/复制），无法破解需要密码才能打开的PDF。
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2 class="section-title">使用说明</h2>
+            <ol style="margin-left: 20px; line-height: 1.8; color: #656d76; font-size: 14px;">
+                <li>上传有权限限制的PDF文件</li>
+                <li>工具会检测PDF的限制状态</li>
+                <li>点击"解锁PDF"生成无限制的新文件</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script src="../../libs/pdf-lib.min.js"></script>
+<script src="../../libs/pdf.min.js"></script>
+<script src="pdf-unlock.js"></script>
+</body>
+</html>

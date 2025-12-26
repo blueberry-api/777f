@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF页面提取合并</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        /* 页面特有样式 */
+        .container { max-width: 1000px; }
+        
+        .pdf-list { margin-top: 16px; }
+        .pdf-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; margin-bottom: 8px; }
+        .pdf-item:last-child { margin-bottom: 0; }
+        .pdf-info { flex: 1; min-width: 0; }
+        .pdf-name { font-size: 14px; font-weight: 500; color: #1f2328; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pdf-meta { font-size: 12px; color: #656d76; margin-top: 4px; }
+        .pdf-pages-input { width: 200px; padding: 6px 10px; border: 1px solid #d0d7de; border-radius: 4px; font-size: 13px; }
+        .pdf-pages-input:focus { outline: none; border-color: #e85a3c; }
+        
+        .btn-preview { background: #e85a3c; border: none; color: white; cursor: pointer; font-size: 12px; padding: 4px 10px; border-radius: 4px; }
+        .btn-preview:hover { background: #d14d31; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: #fff; border-radius: 8px; max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #d0d7de; }
+        .modal-header h3 { font-size: 16px; color: #1f2328; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #656d76; }
+        .modal-close:hover { color: #1f2328; }
+        .modal-body { padding: 16px; overflow: auto; flex: 1; }
+        .modal-footer { padding: 12px 16px; border-top: 1px solid #d0d7de; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .preview-page { border: 1px solid #d0d7de; border-radius: 4px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+        .preview-page:hover { border-color: #e85a3c; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .preview-page.selected { border-color: #e85a3c; border-width: 2px; background: #ffe4de; }
+        .preview-page canvas { width: 100%; display: block; }
+        .preview-page-num { text-align: center; padding: 6px; font-size: 12px; color: #656d76; background: #f6f8fa; }
+        .preview-page.selected .preview-page-num { background: #ffe4de; color: #e85a3c; font-weight: 500; }
+        
+        .selection-info { font-size: 13px; color: #656d76; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a href="../../index.html" class="back-link">返回首页</a>
+        <h1>PDF页面提取合并</h1>
+        <p>上传多个PDF文件，指定页面范围，合并为一个新PDF</p>
+    </div>
+    <div class="main-content">
+        <div class="panel">
+            <h2 class="section-title">第一步：上传PDF文件</h2>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept=".pdf" multiple>
+                <div class="upload-icon"></div>
+                <div class="upload-text">拖拽PDF文件到此处，或 <strong>点击选择文件</strong><br>支持多选，可多次上传</div>
+            </div>
+            <div class="pdf-list" id="pdfList"></div>
+        </div>
+
+        <div class="panel" id="configSection" style="display:none;">
+            <h2 class="section-title">第二步：配置页面范围</h2>
+            <p class="hint">
+                页面范围格式说明：<br>
+                • <code>1-5</code> 提取第1到5页<br>
+                • <code>1,3,5</code> 提取第1、3、5页<br>
+                • <code>1-3,7,9-11</code> 混合使用<br>
+                • 留空表示提取全部页面<br>
+                • 拖拽左侧 ⋮⋮ 可调整PDF顺序
+            </p>
+            <div class="button-group" style="margin-top: 16px;">
+                <button id="mergeBtn" class="btn btn-primary" disabled>合并并下载</button>
+                <button id="clearBtn" class="btn">清空列表</button>
+            </div>
+            <div class="progress-container" id="progressContainer" style="display:none;">
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <div class="progress-text" id="progressText">处理中...</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="section-title">使用说明</h2>
+            <ol style="margin-left: 20px; line-height: 1.8; color: #656d76; font-size: 14px;">
+                <li>上传一个或多个PDF文件（支持拖拽或点击上传）</li>
+                <li>在每个PDF后面的输入框中指定要提取的页面范围</li>
+                <li>拖拽调整PDF的顺序（决定合并后的页面顺序）</li>
+                <li>点击"合并并下载"生成新的PDF文件</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="previewModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="previewTitle">页面预览</h3>
+            <button class="modal-close" id="closeModal">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="preview-grid" id="previewGrid"></div>
+        </div>
+        <div class="modal-footer">
+            <span class="selection-info" id="selectionInfo">点击页面选择/取消</span>
+            <div>
+                <button class="btn" id="selectAllBtn">全选</button>
+                <button class="btn" id="clearSelectionBtn">清空</button>
+                <button class="btn btn-primary" id="applySelectionBtn">应用选择</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../libs/pdf-lib.min.js"></script>
+<script src="../../libs/pdf.min.js"></script>
+<script src="pdf-extract-merge.js"></script>
+</body>
+</html>

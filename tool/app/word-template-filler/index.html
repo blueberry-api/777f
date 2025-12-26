@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word模板填充器（测试）</title>
+    <link rel="stylesheet" href="../../../libs/common.css">
+    <style>
+        .container { max-width: 900px; }
+        
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-box {
+            border: 2px dashed #d0d7de;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .upload-box:hover {
+            border-color: #2563eb;
+            background: #f8fafc;
+        }
+        
+        .upload-box.loaded {
+            border-color: #2563eb;
+        }
+        
+        .upload-box h3 {
+            margin: 0 0 8px;
+            font-size: 15px;
+            color: #1f2328;
+        }
+        
+        .upload-box p {
+            margin: 0 0 12px;
+            font-size: 13px;
+            color: #656d76;
+        }
+        
+        .upload-box input[type="file"] {
+            display: none;
+        }
+        
+        .upload-box label.file-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .upload-box label.file-btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .upload-box .status {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #656d76;
+            word-break: break-all;
+            display: block;
+        }
+        
+        .upload-box .status.success { color: #1a7f37; font-weight: 500; }
+        .upload-box .status.error { color: #cf222e; font-weight: 500; }
+        
+        .app-name-section {
+            margin-bottom: 20px;
+        }
+        
+        .app-name-section label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        
+        .app-name-section input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .app-name-section input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .preview-section {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+        }
+        
+        .preview-section h3 {
+            margin: 0 0 12px;
+            font-size: 15px;
+        }
+        
+        .field-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .field-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        
+        .field-item .name { font-weight: 500; }
+        .field-item .type { color: #656d76; }
+        
+        .header a:hover {
+            text-decoration: underline;
+        }
+        
+        .generate-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #d0d7de;
+            text-align: center;
+        }
+        
+        .generate-section .btn-primary {
+            padding: 12px 32px;
+            font-size: 16px;
+        }
+        
+        .generate-section .btn-primary:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../../index.html" class="back-link">返回首页</a>
+            <h1>Word模板填充器（测试）</h1>
+            <p>上传配置和模板，生成可独立使用的填写页面</p>
+            <span style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:14px;">
+                <a href="javascript:void(0)" onclick="downloadConfigTemplate()" style="color:#2563eb; text-decoration:none; margin-right:16px;">下载配置模板</a>
+                <a href="javascript:void(0)" onclick="downloadSample()" style="color:#2563eb; text-decoration:none;">下载示例</a>
+            </span>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <div class="upload-section">
+                    <div class="upload-box" id="configBox">
+                        <h3>1. 上传配置文件</h3>
+                        <p>Excel格式，定义表单字段</p>
+                        <label class="file-btn">选择文件 <input type="file" id="configFile" accept=".xlsx,.xls"></label>
+                        <div id="configStatus" class="status">未上传</div>
+                    </div>
+                    
+                    <div class="upload-box" id="templateBox">
+                        <h3>2. 上传Word模板</h3>
+                        <p>包含占位符的docx文件</p>
+                        <label class="file-btn">选择文件 <input type="file" id="templateFile" accept=".docx"></label>
+                        <div id="templateStatus" class="status">未上传</div>
+                    </div>
+                </div>
+                
+                <div class="app-name-section">
+                    <label>3. 应用名称</label>
+                    <input type="text" id="appName" placeholder="请填写应用名称">
+                </div>
+                
+                <div class="preview-section" id="previewSection" style="display:none;">
+                    <h3>字段预览</h3>
+                    <div class="field-list" id="fieldList"></div>
+                </div>
+                
+                <div class="generate-section">
+                    <button class="btn btn-primary" id="generateBtn" disabled>生成应用</button>
+                    <p style="margin-top:12px; font-size:13px; color:#656d76;">生成后会下载一个压缩包，包含HTML文件、模板和部署说明</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../../libs/xlsx.full.min.js"></script>
+    <script src="../../../libs/jszip.min.js"></script>
+    <script src="config-template.js"></script>
+    <script src="config-parser.js"></script>
+    <script src="html-generator.js"></script>
+    <script src="app-packager.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

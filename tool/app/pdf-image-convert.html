@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF与图片互转</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        /* 页面特有样式 */
+        .container { max-width: 1000px; }
+        
+        .tabs { display: flex; gap: 0; margin-bottom: 16px; }
+        .tab { flex: 1; padding: 12px 20px; border: 1px solid #d0d7de; background: #f6f8fa; cursor: pointer; font-size: 14px; font-weight: 500; text-align: center; color: #656d76; transition: all 0.2s; }
+        .tab:first-child { border-radius: 6px 0 0 6px; }
+        .tab:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+        .tab.active { background: #fff; color: #1f2328; border-bottom-color: #fff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .options { margin-top: 16px; padding: 16px; background: #f6f8fa; border-radius: 6px; }
+        .option-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .option-row label { font-size: 13px; color: #1f2328; }
+        .option-row select { padding: 6px 10px; border: 1px solid #d0d7de; border-radius: 4px; font-size: 13px; }
+        
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
+        .preview-item { border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; background: #fff; }
+        .preview-item img { width: 100%; display: block; }
+        .preview-item-info { padding: 8px; font-size: 12px; color: #656d76; display: flex; justify-content: space-between; align-items: center; }
+        .preview-item-info a { color: #e85a3c; text-decoration: none; }
+        .preview-item-info a:hover { text-decoration: underline; }
+        
+        .image-list { margin-top: 16px; }
+        .image-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; margin-bottom: 8px; }
+        .image-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
+        .image-item-info { flex: 1; min-width: 0; }
+        .image-item-name { font-size: 13px; color: #1f2328; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .image-item-size { font-size: 12px; color: #656d76; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <a href="../../index.html" class="back-link">返回首页</a>
+        <h1>PDF与图片互转</h1>
+        <p>PDF转JPG 或 图片转PDF，支持批量处理</p>
+    </div>
+    <div class="main-content">
+        <div class="panel">
+            <div class="tabs">
+                <div class="tab active" data-tab="pdf2img">PDF 转 图片</div>
+                <div class="tab" data-tab="img2pdf">图片 转 PDF</div>
+            </div>
+            
+            <div class="tab-content active" id="pdf2img">
+                <div class="upload-area" id="pdfUploadArea">
+                    <input type="file" id="pdfInput" accept=".pdf">
+                    <div class="upload-icon"></div>
+                    <div class="upload-text">拖拽PDF文件到此处，或 <strong>点击选择文件</strong></div>
+                </div>
+                <div id="pdfInfo" class="file-info" style="display:none;"></div>
+                <div class="options" id="pdfOptions" style="display:none;">
+                    <div class="option-row">
+                        <label>输出格式：</label>
+                        <select id="imgFormat"><option value="jpeg">JPG</option><option value="png">PNG</option></select>
+                        <label style="margin-left:16px;">图片质量：</label>
+                        <select id="imgQuality"><option value="0.6">低 (60%)</option><option value="0.8" selected>中 (80%)</option><option value="0.92">高 (92%)</option><option value="1">最高 (100%)</option></select>
+                        <label style="margin-left:16px;">缩放比例：</label>
+                        <select id="imgScale"><option value="1">1x</option><option value="1.5">1.5x</option><option value="2" selected>2x</option><option value="3">3x</option></select>
+                    </div>
+                    <div class="button-group" style="margin-top: 12px;">
+                        <button id="convertPdfBtn" class="btn btn-primary">转换为图片</button>
+                        <button id="downloadAllBtn" class="btn" style="display:none;">打包下载全部</button>
+                    </div>
+                </div>
+                <div class="progress-container" id="pdfProgress" style="display:none;">
+                    <div class="progress-bar"><div class="progress-fill" id="pdfProgressFill"></div></div>
+                    <div class="progress-text" id="pdfProgressText">处理中...</div>
+                </div>
+                <div class="preview-grid" id="pdfPreviewGrid"></div>
+            </div>
+            
+            <div class="tab-content" id="img2pdf">
+                <div class="upload-area" id="imgUploadArea">
+                    <input type="file" id="imgInput" accept="image/*" multiple>
+                    <div class="upload-icon"></div>
+                    <div class="upload-text">拖拽图片到此处，或 <strong>点击选择图片</strong><br>支持 JPG、PNG、WebP 等格式，可多选</div>
+                </div>
+                <div class="image-list" id="imageList"></div>
+                <div class="options" id="imgOptions" style="display:none;">
+                    <div class="option-row">
+                        <label>页面尺寸：</label>
+                        <select id="pageSize">
+                            <option value="fit">适应图片大小</option>
+                            <option value="a4">A4 纸张</option>
+                            <option value="letter">Letter 纸张</option>
+                        </select>
+                        <label style="margin-left:16px;">图片位置：</label>
+                        <select id="imgPosition">
+                            <option value="center">居中</option>
+                            <option value="fill">填充整页</option>
+                        </select>
+                    </div>
+                    <div class="button-group" style="margin-top: 12px;">
+                        <button id="convertImgBtn" class="btn btn-primary">生成PDF</button>
+                        <button id="clearImgBtn" class="btn">清空列表</button>
+                    </div>
+                </div>
+                <div class="progress-container" id="imgProgress" style="display:none;">
+                    <div class="progress-bar"><div class="progress-fill" id="imgProgressFill"></div></div>
+                    <div class="progress-text" id="imgProgressText">处理中...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2 class="section-title">使用说明</h2>
+            <ol style="margin-left: 20px; line-height: 1.8; color: #656d76; font-size: 14px;">
+                <li>PDF转图片：上传PDF，选择输出格式和质量，点击转换后可逐张下载</li>
+                <li>图片转PDF：上传多张图片，拖拽调整顺序，点击生成PDF</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script src="../../libs/pdf-lib.min.js"></script>
+<script src="../../libs/pdf.min.js"></script>
+<script src="../../libs/jszip.min.js"></script>
+<script src="pdf-image-convert.js"></script>
+</body>
+</html>

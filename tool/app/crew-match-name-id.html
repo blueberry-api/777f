@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>姓名匹配员工号</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        /* 页面特有样式 */
+        .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        #fileInput {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        #fileStatus {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .input-output-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .input-section, .output-section {
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            flex: 1;
+        }
+        
+        .input-area {
+            min-height: 200px;
+        }
+        
+        .input-header, .output-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background: #f6f8fa;
+            padding: 8px 12px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px 6px 0 0;
+            border-bottom: none;
+            gap: 12px;
+        }
+        
+        .table-header span {
+            font-weight: 600;
+            color: #1f2328;
+            font-size: 14px;
+        }
+        
+        .table-container {
+            border: 1px solid #d0d7de;
+            border-radius: 0 0 6px 6px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table-container td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #d0d7de;
+            font-size: 14px;
+        }
+        
+        .table-container tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table-container tr.selected {
+            background: #dbeafe;
+        }
+        
+        .table-container td:first-child {
+            width: 30px;
+        }
+        
+        .output-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            color: #656d76;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .input-output-container { flex-direction: column; }
+            .file-input-wrapper { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="../../index.html" class="back-link">返回首页</a>
+            <h1>姓名匹配员工号</h1>
+        </div>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2 class="section-title">导入员工数据</h2>
+                <div class="file-input-wrapper">
+                    <span id="fileStatus"></span>
+                    <label class="btn" style="cursor:pointer;">
+                        重新选择文件
+                        <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+                    </label>
+                </div>
+            </div>
+            
+            <div class="input-output-container">
+                <div class="input-section">
+                    <h2 class="section-title">输入文本</h2>
+                    <div class="input-header">
+                        <div class="button-group">
+                            <button id="searchBtn" class="btn btn-primary" disabled>查询匹配</button>
+                            <button id="clearBtn" class="btn">清空输入</button>
+                        </div>
+                    </div>
+                    <textarea id="textInput" class="input-area" placeholder="请在此处粘贴或输入包含员工姓名的文本内容..."></textarea>
+                </div>
+                
+                <div class="output-section">
+                    <h2 class="section-title">匹配结果</h2>
+                    <div class="output-header">
+                        <div class="button-group">
+                            <button id="copyNameBtn" class="btn btn-primary">复制姓名列</button>
+                            <button id="copyIdBtn" class="btn btn-primary">复制员工号列</button>
+                        </div>
+                    </div>
+                    <div id="resultArea">
+                        <div class="table-header">
+                            <span style="width:30px"><input type="checkbox" id="selectAll" title="全选"></span>
+                            <span style="flex:1">姓名</span>
+                            <span style="flex:1">员工号</span>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <tbody id="resultBody">
+                                    <tr><td colspan="2" class="no-result">匹配结果将显示在这里...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="output-info">
+                        <span id="countInfo">匹配到 0 个员工</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="section-title">使用说明</h2>
+                <p>从混杂着机组姓名的文本中提取姓名并匹配员工号。</p>
+                <ol style="margin-left: 20px; margin-top: 8px; line-height: 1.8; color: #656d76;">
+                    <li>导入包含员工号和姓名的Excel文件（第一列员工号，第二列姓名）</li>
+                    <li>将文本粘贴到输入框</li>
+                    <li>点击"查询匹配"</li>
+                    <li>点击复制按钮复制结果（有选中的只复制选中的，没选中则复制全部）</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+<script src="../../libs/xlsx.full.min.js"></script>
+<script src="crew-match-name-id.js"></script>
+</body>
+</html>

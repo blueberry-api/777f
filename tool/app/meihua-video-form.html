@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美华模拟机视频检查表</title>
+    <link rel="stylesheet" href="../../libs/common.css">
+    <style>
+        .container { max-width: 900px; }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f2328;
+            margin-bottom: 6px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        
+        .radio-group input {
+            cursor: pointer;
+        }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>美华模拟机视频检查表</h1>
+            <p>填写完成后可导出为Word文档</p>
+            <label id="manualUpload" style="display:none; position:absolute; right:16px; top:50%; transform:translateY(-50%); color:#2563eb; cursor:pointer; font-size:14px;">
+                手动导入模板 <input type="file" id="templateFile" accept=".docx" style="display:none;">
+            </label>
+        </div>
+
+        
+        <div class="main-content">
+            <div class="panel">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="checkDate">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>教员</label>
+                        <input type="text" id="instructor">
+                    </div>
+                    <div class="form-group">
+                        <label>学员1</label>
+                        <input type="text" id="student1">
+                    </div>
+                    <div class="form-group">
+                        <label>学员2</label>
+                        <input type="text" id="student2">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>检查方式</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="checkMethod" value="file"> 实地文件检查</label>
+                        <label><input type="radio" name="checkMethod" value="field"> 实地现场检查</label>
+                        <label><input type="radio" name="checkMethod" value="video" checked> 视频检查</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>检查形式</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="checkType" value="single" checked> 单独检查</label>
+                        <label><input type="radio" name="checkType" value="joint"> 联合检查</label>
+                        <label><input type="radio" name="checkType" value="cross"> 交叉检查</label>
+                    </div>
+                </div>
+
+                <h3 class="section-title">检查项目</h3>
+                
+                <div class="check-table">
+                    <div class="check-category">飞行作风类监控指标</div>
+                    <div class="check-item">
+                        <span class="item-code">2.1</span>
+                        <span class="item-desc">未按照规定使用安全带</span>
+                        <input type="text" class="item-result" id="item_2_1" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">2.3</span>
+                        <span class="item-desc">未按公司运行规定佩戴耳机</span>
+                        <input type="text" class="item-result" id="item_2_3" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">2.11</span>
+                        <span class="item-desc">违反训练作风纪律及管理规定，使用便携式电子设备娱乐功能</span>
+                        <input type="text" class="item-result" id="item_2_11" value="无">
+                    </div>
+                    
+                    <div class="check-category">运行作风监控指标</div>
+                    <div class="check-item">
+                        <span class="item-code">11.4</span>
+                        <span class="item-desc">穿衣戴帽等仪容仪表不符合公司要求包含未着统一制服、皮鞋、箱包，发型不规范等</span>
+                        <input type="text" class="item-result" id="item_11_4" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">13.9</span>
+                        <span class="item-desc">训练讲评结束后未清理卫生，遗留餐食、垃圾等</span>
+                        <input type="text" class="item-result" id="item_13_9" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">14.1</span>
+                        <span class="item-desc">违规饮酒</span>
+                        <input type="text" class="item-result" id="item_14_1" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">14.4</span>
+                        <span class="item-desc">未严格履行请、销假制度</span>
+                        <input type="text" class="item-result" id="item_14_4" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">14.5</span>
+                        <span class="item-desc">违反酒店住宿管理规定被判定为有效投诉，包括酒店抽烟、大声喧哗等</span>
+                        <input type="text" class="item-result" id="item_14_5" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">14.8</span>
+                        <span class="item-desc">训练期间不当娱乐、不当着装造成不良影响的</span>
+                        <input type="text" class="item-result" id="item_14_8" value="无">
+                    </div>
+                    
+                    <div class="check-category">训练作风类指标</div>
+                    <div class="check-item">
+                        <span class="item-code">21.1</span>
+                        <span class="item-desc">未按要求完成模拟机训练前准备</span>
+                        <input type="text" class="item-result" id="item_21_1" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">21.2</span>
+                        <span class="item-desc">未按计划时间、课程实施训练包括迟到、早退等</span>
+                        <input type="text" class="item-result" id="item_21_2" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">21.3</span>
+                        <span class="item-desc">未按规定参加训练后讲评</span>
+                        <input type="text" class="item-result" id="item_21_3" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">21.4</span>
+                        <span class="item-desc">违反训练机构（美华模拟机单位）制定的相关管理规定包括未遵守训练机构管理规定被教员、检查员、训练中心投诉或记录未经允许擅自使用训练设施设备</span>
+                        <input type="text" class="item-result" id="item_21_4" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">21.5</span>
+                        <span class="item-desc">违反公司制定的相关训练管理规定包括未按规定携带飞行箱、EFB、训练资料（不符合资质或者未携带有效证照、用具、文件参加训练）训练记录填写不规范、不完整的（未按规定填写云执照、飞行记录、训练记录等行为</span>
+                        <input type="text" class="item-result" id="item_21_5" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">21.6</span>
+                        <span class="item-desc">理论训练中违反考勤纪律、教学纪律等</span>
+                        <input type="text" class="item-result" id="item_21_6" value="无">
+                    </div>
+                    
+                    <div class="check-category">教学类作风监控指标</div>
+                    <div class="check-item">
+                        <span class="item-code">51.1</span>
+                        <span class="item-desc">经核实的教学作风问题，查实存在"吃拿卡要"行为</span>
+                        <input type="text" class="item-result" id="item_51_1" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">51.2</span>
+                        <span class="item-desc">经核实存在教员不履职行为包括航线带飞率低于标准，未按规定实施教学与讲评，除病事假以外的个人原因调整模拟机教学计划，事假需要走流程批复</span>
+                        <input type="text" class="item-result" id="item_51_2" value="无">
+                    </div>
+                    <div class="check-item">
+                        <span class="item-code">51.3</span>
+                        <span class="item-desc">对学员体罚或者带个人攻击性的严重不当语言</span>
+                        <input type="text" class="item-result" id="item_51_3" value="无">
+                    </div>
+                </div>
+                
+                <h3 class="section-title">检查结论</h3>
+                
+                <div class="form-group">
+                    <label>个人情况判定</label>
+                    <textarea id="judgment"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>检查员签字</label>
+                    <input type="text" id="inspector">
+                </div>
+                
+                <div class="button-group" style="margin-top: 24px;">
+                    <button class="btn btn-primary" id="exportBtn">导出Word文档</button>
+                    <button class="btn" id="clearBtn">清空表单</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<style>
+.section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2328;
+    margin: 24px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #d0d7de;
+}
+
+.check-table {
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.check-category {
+    background: #f6f8fa;
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1f2328;
+    border-bottom: 1px solid #d0d7de;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #d0d7de;
+    gap: 12px;
+}
+
+.check-item:last-child {
+    border-bottom: none;
+}
+
+.item-code {
+    font-size: 13px;
+    color: #656d76;
+    min-width: 40px;
+}
+
+.item-desc {
+    flex: 1;
+    font-size: 13px;
+    color: #1f2328;
+    line-height: 1.4;
+}
+
+.item-result {
+    width: 100px;
+    padding: 6px 10px;
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.item-result:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.form-group textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+</style>
+
+<script src="../../libs/pizzip.min.js"></script>
+<script src="../../libs/docxtemplater.min.js"></script>
+<script src="meihua-video-form.js"></script>
+</body>
+</html>
